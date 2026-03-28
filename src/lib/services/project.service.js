@@ -13,6 +13,13 @@ export const ProjectService = {
     });
   },
 
+  /** Fetch a single project — only if it belongs to the requesting user. */
+  async getById(id, userId) {
+    return prisma.project.findFirst({
+      where: { id, userId },
+    });
+  },
+
   /** Create a new project. */
   async create({ userId, name, description, color, icon, visibility }) {
     return prisma.project.create({

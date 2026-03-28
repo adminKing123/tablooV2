@@ -95,7 +95,7 @@ export default function OTPInput({ value = '', onChange, disabled = false, autoF
           aria-label={`Digit ${i + 1} of 6`}
           className={[
             // Layout & typography
-            'w-11 h-14 sm:w-12 sm:h-[3.75rem]',
+            'w-11 h-14 sm:w-12 sm:h-15',
             'text-center text-xl sm:text-2xl font-mono font-bold',
             'rounded-xl border-2 transition-all duration-150',
             'focus:outline-none focus:ring-4',

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import NewProjectModal from './NewProjectModal';
 import { PlusIcon } from '@/assets/icons';
 
@@ -76,9 +77,10 @@ export default function WorkspaceClient({ workspaceName, initialProjects }) {
             const created = new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
             return (
-              <div
+              <Link
                 key={project.id}
-                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
+                href={`/workspace/${project.id}`}
+                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-150"
               >
                 {/* Card header */}
                 <div className="flex items-center gap-3">
@@ -112,14 +114,14 @@ export default function WorkspaceClient({ workspaceName, initialProjects }) {
                     Active
                   </span>
                 </div>
-              </div>
+              </Link>
             );
           })}
 
           {/* Add another project card */}
           <button
             onClick={() => setModalOpen(true)}
-            className="bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-600 min-h-[120px] hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all"
+            className="bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-600 min-h-30 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all"
           >
             <PlusIcon className="w-6 h-6" />
             <span className="text-xs font-medium">New Project</span>
