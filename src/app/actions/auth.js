@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Prisma } from '@prisma/client';
 import { AuthService } from '@/lib/services/auth.service';
 import { validateLogin, validateSignup } from '@/lib/utils/validate';
-import { sendOTPEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/email';
 
 /**
  * Map AuthService named error codes to user-facing messages.
@@ -20,7 +20,7 @@ const ERROR_MAP = {
   OTP_NOT_FOUND:       'No OTP found — please request a new one',
   OTP_USED:            'OTP already used — please request a new one',
   OTP_EXPIRED:         'OTP expired — please request a new one',
-  OTP_INVALID:         'Invalid OTP code',
+  OTP_INVALID:         'Incorrect code — please check and try again',
 };
 
 function toErrorMessage(err) {
@@ -155,4 +155,78 @@ export async function logoutAction() {
   const jar = await cookies();
   jar.delete('auth_token');
   redirect('/login');
+}
+/* ─────────────────────────────────────────────────────
+   forgotPasswordAction
+   Looks up the email and—if found—sends a PASSWORD_RESET OTP.
+   Always redirects to /reset-password (no email-enumeration leak).
+──────────────────────────────────────────────────── */
+export async function forgotPasswordAction(prevState, formData) {
+  const email = formData.get('email')?.toString().trim() ?? '';
+  if (!email) return { error: 'Email address is required' };
+
+  // Attempt to create a reset OTP — silently ignore if user not found
+  const result = await AuthService.forgotPassword(email).catch((err) => {
+    console.error('forgotPasswordAction:', err.message);
+    return null;
+  });
+
+  if (result) {
+    sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
+      .catch(err => console.error('Password reset email failed:', err));
+  }
+
+  // Always redirect — never reveal whether the email is registered
+  redirect(`/reset-password?email=${encodeURIComponent(email)}`);
+}
+
+/* ─────────────────────────────────────────────────────
+   resetPasswordAction
+   Verifies the PASSWORD_RESET OTP and updates the user’s password.
+   On success: redirects to /login?reset=1.
+   On failure: returns { error: string }.
+──────────────────────────────────────────────────── */
+export async function resetPasswordAction(prevState, formData) {
+  const email           = formData.get('email')?.toString().trim()  ?? '';
+  const otpCode         = formData.get('otpCode')?.toString().trim() ?? '';
+  const newPassword     = formData.get('newPassword')?.toString()    ?? '';
+  const confirmPassword = formData.get('confirmPassword')?.toString() ?? '';
+
+  if (!otpCode)                           return { error: 'Please enter the 6-digit reset code' };
+  if (otpCode.replace(/\s/g, '').length !== 6) return { error: 'The reset code must be 6 digits' };
+  if (!newPassword)                       return { error: 'New password is required' };
+  if (newPassword.length < 8)             return { error: 'Password must be at least 8 characters' };
+  if (newPassword !== confirmPassword)    return { error: 'Passwords do not match' };
+
+  try {
+    await AuthService.verifyAndResetPassword(email, otpCode, newPassword);
+  } catch (err) {
+    console.error('resetPasswordAction:', err.message);
+    return { error: toErrorMessage(err) };
+  }
+
+  redirect('/login?reset=1');
+}
+
+/* ─────────────────────────────────────────────────────
+   resendResetOTPAction
+   Resends a PASSWORD_RESET OTP for the /reset-password page.
+   Returns { error } | { success }.
+──────────────────────────────────────────────────── */
+export async function resendResetOTPAction(prevState, formData) {
+  const email = formData.get('email')?.toString().trim() ?? '';
+  if (!email) return { error: 'Email is required' };
+
+  const result = await AuthService.forgotPassword(email).catch((err) => {
+    console.error('resendResetOTPAction:', err.message);
+    return null;
+  });
+
+  if (result) {
+    sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
+      .catch(err => console.error('Resend reset email failed:', err));
+  }
+
+  // Generic message — no enumeration
+  return { success: 'A new reset code has been sent if that email is registered.' };
 }

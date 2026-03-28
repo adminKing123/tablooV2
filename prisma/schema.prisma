@@ -34,6 +34,7 @@ model Otp {
   id        Int      @id @default(autoincrement())
   userId    Int      @map("user_id")
   otpCode   String   @map("otp_code") @db.VarChar(6)
+  type      String   @default("EMAIL_VERIFICATION") @map("type") @db.VarChar(32)
   expiresAt DateTime @map("expires_at")
   isUsed    Boolean  @default(false) @map("is_used")
   createdAt DateTime @default(now()) @map("created_at")

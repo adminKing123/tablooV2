@@ -3,6 +3,12 @@ import { hashPassword, verifyPassword } from '@/lib/password';
 import { generateOTP, getOTPExpiration } from '@/lib/otp';
 import { generateToken } from '@/lib/jwt';
 
+/** OTP type constants — must match the DB varchar(32) values. */
+export const OTP_TYPES = {
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+  PASSWORD_RESET:     'PASSWORD_RESET',
+};
+
 /**
  * AuthService — all authentication business logic.
  *
@@ -46,17 +52,19 @@ export const AuthService = {
 
   /**
    * Create an OTP record for a user and return the plain code.
+   * @param {number} userId
+   * @param {'EMAIL_VERIFICATION'|'PASSWORD_RESET'} type
    */
-  async createOTP(userId) {
-    const otpCode = generateOTP();
+  async createOTP(userId, type = OTP_TYPES.EMAIL_VERIFICATION) {
+    const otpCode  = generateOTP();
     const expiresAt = getOTPExpiration();
-    await prisma.otp.create({ data: { userId, otpCode, expiresAt } });
+    await prisma.otp.create({ data: { userId, otpCode, expiresAt, type } });
     return otpCode;
   },
 
   /**
-   * Verify an OTP and activate the account.
-   * Deletes all OTPs for the user on success.
+   * Verify an EMAIL_VERIFICATION OTP and activate the account.
+   * Deletes all email-verification OTPs for the user on success.
    * Throws a named error code string on any failure.
    */
   async verifyOTP(email, otpCode) {
@@ -69,17 +77,17 @@ export const AuthService = {
     if (user.isVerified) throw new Error('ALREADY_VERIFIED');
 
     const otp = await prisma.otp.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.id, type: OTP_TYPES.EMAIL_VERIFICATION },
       orderBy: { createdAt: 'desc' },
     });
 
-    if (!otp)               throw new Error('OTP_NOT_FOUND');
-    if (otp.isUsed)         throw new Error('OTP_USED');
-    if (new Date() > otp.expiresAt) throw new Error('OTP_EXPIRED');
-    if (otp.otpCode !== otpCode)    throw new Error('OTP_INVALID');
+    if (!otp)                           throw new Error('OTP_NOT_FOUND');
+    if (otp.isUsed)                     throw new Error('OTP_USED');
+    if (new Date() > otp.expiresAt)     throw new Error('OTP_EXPIRED');
+    if (otp.otpCode !== otpCode)        throw new Error('OTP_INVALID');
 
     await prisma.user.update({ where: { id: user.id }, data: { isVerified: true } });
-    await prisma.otp.deleteMany({ where: { userId: user.id } });
+    await prisma.otp.deleteMany({ where: { userId: user.id, type: OTP_TYPES.EMAIL_VERIFICATION } });
 
     return user;
   },
@@ -110,5 +118,56 @@ export const AuthService = {
       where: { id, isVerified: true },
       select: { id: true, email: true, firstName: true, lastName: true, createdAt: true },
     });
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Password reset flow
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Initiate a password reset for a verified user.
+   * Returns { user, otpCode } or null if the email is unknown / not verified
+   * (null is intentional — callers must not reveal whether the email exists).
+   */
+  async forgotPassword(email) {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true, firstName: true, isVerified: true },
+    });
+
+    if (!user?.isVerified) return null;
+
+    // Invalidate any existing password-reset OTPs for this user
+    await prisma.otp.deleteMany({ where: { userId: user.id, type: OTP_TYPES.PASSWORD_RESET } });
+
+    const otpCode = await AuthService.createOTP(user.id, OTP_TYPES.PASSWORD_RESET);
+    return { user, otpCode };
+  },
+
+  /**
+   * Verify a PASSWORD_RESET OTP and set a new password atomically.
+   * Throws a named error code string on any failure.
+   */
+  async verifyAndResetPassword(email, otpCode, newPassword) {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true },
+    });
+
+    if (!user) throw new Error('USER_NOT_FOUND');
+
+    const otp = await prisma.otp.findFirst({
+      where: { userId: user.id, type: OTP_TYPES.PASSWORD_RESET, isUsed: false },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!otp)                       throw new Error('OTP_NOT_FOUND');
+    if (new Date() > otp.expiresAt) throw new Error('OTP_EXPIRED');
+    if (otp.otpCode !== otpCode)    throw new Error('OTP_INVALID');
+
+    const passwordHash = await hashPassword(newPassword);
+
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+    await prisma.otp.deleteMany({ where: { userId: user.id, type: OTP_TYPES.PASSWORD_RESET } });
   },
 };

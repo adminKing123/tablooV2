@@ -9,7 +9,7 @@ export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   const protectedRoutes = ['/profile'];
-  const authRoutes = ['/login', '/signup', '/verify-otp'];
+  const authRoutes = ['/login', '/signup', '/verify-otp', '/forgot-password', '/reset-password'];
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));

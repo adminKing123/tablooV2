@@ -15,8 +15,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Tabloo - Modern SaaS Platform",
-  description: "Secure authentication with email verification and protected routes",
+  metadataBase: new URL(process.env.APP_URL ?? 'http://localhost:3000'),
+  title: { template: '%s — Tabloo', default: 'Tabloo — Modern SaaS Platform' },
+  description: 'Secure authentication with email verification and protected routes.',
+  robots: { index: false, follow: false },
 };
 
 /**

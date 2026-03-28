@@ -16,6 +16,7 @@ import Spinner from '@/components/ui/Spinner';
 function LoginForm() {
   const searchParams = useSearchParams();
   const justVerified = searchParams.get('verified') === '1';
+  const justReset    = searchParams.get('reset')    === '1';
   const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
@@ -34,6 +35,9 @@ function LoginForm() {
       <form action={formAction} className="space-y-4">
         {justVerified && (
           <Alert type="success" message="Email verified! You can now sign in." />
+        )}
+        {justReset && (
+          <Alert type="success" message="Password reset successfully! You can now sign in." />
         )}
         <Alert type="error" message={state?.error} />
 
@@ -60,9 +64,9 @@ function LoginForm() {
             disabled={pending}
           />
           <div className="text-right">
-            <span className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 cursor-pointer">
+            <Link href="/forgot-password" className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
               Forgot password?
-            </span>
+            </Link>
           </div>
         </div>
 
