@@ -93,6 +93,26 @@ export const AuthService = {
   },
 
   /**
+   * Return an existing valid (unused, unexpired) EMAIL_VERIFICATION OTP for
+   * the user, or create a fresh one if none exists.
+   * Used when redirecting an unverified user to the verify-otp page on login.
+   */
+  async getOrCreateVerificationOTP(userId) {
+    const existing = await prisma.otp.findFirst({
+      where: {
+        userId,
+        type:    OTP_TYPES.EMAIL_VERIFICATION,
+        isUsed:  false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (existing) return existing.otpCode;
+    return AuthService.createOTP(userId, OTP_TYPES.EMAIL_VERIFICATION);
+  },
+
+  /**
    * Authenticate a user and return { user, token }.
    * Throws 'INVALID_CREDENTIALS' or 'EMAIL_NOT_VERIFIED' on failure.
    */

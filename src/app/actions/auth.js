@@ -45,6 +45,16 @@ export async function loginAction(prevState, formData) {
   try {
     ({ token } = await AuthService.login(email, password));
   } catch (err) {
+    // Unverified user — send/reuse their OTP and redirect to verification
+    if (err.message === 'EMAIL_NOT_VERIFIED') {
+      const user = await AuthService.findByEmail(email);
+      if (user) {
+        const otpCode = await AuthService.getOrCreateVerificationOTP(user.id);
+        sendOTPEmail(user.email, user.firstName, otpCode)
+          .catch(e => console.error('Verification redirect email failed:', e));
+      }
+      redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
+    }
     console.error('loginAction:', err.message);
     return { error: toErrorMessage(err) };
   }
