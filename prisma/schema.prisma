@@ -31,9 +31,32 @@ model User {
   onboardingCompleted Boolean  @default(false)            @map("onboarding_completed")
 
   // Relations
-  otps Otp[]
+  otps     Otp[]
+  projects Project[]
 
   @@map("users")
+}
+
+// ─── Project ──────────────────────────────────────────────────────────────────
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  color       String   @default("#6366f1") @db.VarChar(20)
+  icon        String   @default("📁") @db.VarChar(10)
+  status      String   @default("ACTIVE") @db.VarChar(20)
+  visibility  String   @default("PRIVATE") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@map("projects")
 }
 
 // ─── OTP ─────────────────────────────────────────────────────────────────────

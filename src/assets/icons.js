@@ -262,3 +262,36 @@ export function SparklesIcon({ className = '', ...props }) {
     </svg>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Action / utility icons
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Plus / add icon — use strokeWidth prop to override the default 2 */
+export function PlusIcon({ className = '', ...props }) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 24 24" className={className} aria-hidden="true" {...props}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+/** X / close / dismiss icon */
+export function XMarkIcon({ className = '', ...props }) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 24 24" className={className} aria-hidden="true" {...props}>
+      <line x1="4" y1="4" x2="20" y2="20" />
+      <line x1="20" y1="4" x2="4" y2="20" />
+    </svg>
+  );
+}
+
+/** Bare checkmark (no circle) — e.g. for selected-state indicators */
+export function CheckIcon({ className = '', ...props }) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" className={className} aria-hidden="true" {...props}>
+      <polyline points="4 12 9 18 20 6" />
+    </svg>
+  );
+}
