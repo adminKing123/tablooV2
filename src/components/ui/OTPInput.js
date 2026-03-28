@@ -61,7 +61,7 @@ export default function OTPInput({ value = '', onChange, disabled = false }) {
           onPaste={handlePaste}
           disabled={disabled}
           aria-label={`Digit ${i + 1}`}
-          className="w-11 h-14 text-center text-2xl font-bold text-slate-900 border-2 border-slate-300 rounded-xl bg-white transition-all duration-150 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:bg-slate-100 disabled:cursor-not-allowed caret-transparent"
+          className="w-11 h-14 text-center text-2xl font-bold text-slate-900 dark:text-slate-100 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 transition-all duration-150 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 disabled:bg-slate-100 dark:disabled:bg-slate-800/80 disabled:cursor-not-allowed caret-transparent"
         />
       ))}
     </div>

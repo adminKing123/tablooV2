@@ -7,7 +7,7 @@
 
 const CONFIG = {
   error: {
-    wrapper: 'bg-red-50 border-red-200 text-red-800',
+    wrapper: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300',
     icon: (
       <svg className="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path
@@ -19,7 +19,7 @@ const CONFIG = {
     ),
   },
   success: {
-    wrapper: 'bg-green-50 border-green-200 text-green-800',
+    wrapper: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800/50 text-green-800 dark:text-green-300',
     icon: (
       <svg className="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path
@@ -31,7 +31,7 @@ const CONFIG = {
     ),
   },
   warning: {
-    wrapper: 'bg-amber-50 border-amber-200 text-amber-800',
+    wrapper: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300',
     icon: (
       <svg className="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path
@@ -43,7 +43,7 @@ const CONFIG = {
     ),
   },
   info: {
-    wrapper: 'bg-blue-50 border-blue-200 text-blue-800',
+    wrapper: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/50 text-blue-800 dark:text-blue-300',
     icon: (
       <svg className="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
         <path

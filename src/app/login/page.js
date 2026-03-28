@@ -25,7 +25,7 @@ function LoginForm() {
       footer={
         <span>
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-indigo-600 hover:text-indigo-500 font-medium">
+          <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium">
             Sign up
           </Link>
         </span>
@@ -60,7 +60,7 @@ function LoginForm() {
             disabled={pending}
           />
           <div className="text-right">
-            <span className="text-xs text-indigo-600 hover:text-indigo-500 cursor-pointer">
+            <span className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 cursor-pointer">
               Forgot password?
             </span>
           </div>
@@ -78,7 +78,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
           <Spinner className="w-8 h-8 text-indigo-500" />
         </div>
       }

@@ -32,7 +32,7 @@ function VerifyOTPContent() {
         email ? (
           <span>
             We sent a 6-digit code to{' '}
-            <span className="font-medium text-slate-700">{email}</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{email}</span>
           </span>
         ) : (
           'Enter the 6-digit code we sent to your email'
@@ -74,11 +74,11 @@ function VerifyOTPContent() {
       <form action={resendAction} className="mt-4 text-center">
         <input type="hidden" name="email" value={email} />
         <Alert type="error" message={resendState?.error} className="mb-3 text-left" />
-        <span className="text-sm text-slate-500">Didn&apos;t receive a code?{' '}</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">Didn&apos;t receive a code?{' '}</span>
         <button
           type="submit"
           disabled={resendPending}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {resendPending ? 'Sending…' : 'Resend code'}
         </button>
@@ -91,7 +91,7 @@ export default function VerifyOTPPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
           <Spinner className="w-8 h-8 text-indigo-500" />
         </div>
       }
