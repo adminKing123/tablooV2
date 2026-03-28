@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 /**
- * Edge-compatible middleware for route protection.
+ * Edge-compatible proxy for route protection.
  * Uses jose for JWT verification (jsonwebtoken does not run on the Edge runtime).
  */
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   const protectedRoutes = ['/profile'];
