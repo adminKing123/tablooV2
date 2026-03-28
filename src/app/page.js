@@ -1,64 +1,48 @@
 import Link from 'next/link';
+import {
+  LockClosedIcon,
+  MailIcon,
+  ShieldCheckIcon,
+  DatabaseIcon,
+  PaintBrushIcon,
+  BoltIcon,
+} from '@/assets/icons';
 
 const FEATURES = [
   {
     title: 'Secure authentication',
     description: 'JWT tokens, bcrypt hashing, and OTP email verification — all industry best practices.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>
-    ),
+    icon: <LockClosedIcon className="w-5 h-5" />,
     color: 'bg-indigo-100 text-indigo-600',
   },
   {
     title: 'Email verification',
     description: 'Ensure every account is real with expiring one-time passwords sent via SMTP.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: <MailIcon className="w-5 h-5" />,
     color: 'bg-violet-100 text-violet-600',
   },
   {
     title: 'Protected routes',
     description: 'Middleware-based access control with Edge-compatible JWT verification.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
+    icon: <ShieldCheckIcon className="w-5 h-5" />,
     color: 'bg-emerald-100 text-emerald-600',
   },
   {
     title: 'Scalable database',
     description: 'PostgreSQL via Supabase with Prisma ORM — type-safe, migration-ready schema.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-      </svg>
-    ),
+    icon: <DatabaseIcon className="w-5 h-5" />,
     color: 'bg-sky-100 text-sky-600',
   },
   {
     title: 'Modern UI',
     description: 'Reusable, accessible components built on Tailwind CSS v4 and React 19.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-      </svg>
-    ),
+    icon: <PaintBrushIcon className="w-5 h-5" />,
     color: 'bg-rose-100 text-rose-600',
   },
   {
     title: 'Next.js App Router',
     description: 'Built on Next.js 16 with full App Router, server components, and React compiler.',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
+    icon: <BoltIcon className="w-5 h-5" />,
     color: 'bg-amber-100 text-amber-600',
   },
 ];

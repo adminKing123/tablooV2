@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { CheckCircleIcon, LockClosedIcon } from '@/assets/icons';
 
 /** Individual display row inside the account details card */
 function ProfileField({ label, value }) {
@@ -52,13 +53,7 @@ export default async function ProfilePage() {
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 break-all">{user.email}</p>
             <span className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <CheckCircleIcon className="w-3 h-3" />
               Verified
             </span>
           </div>
@@ -80,9 +75,7 @@ export default async function ProfilePage() {
         <div className="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-6">
           <div className="flex items-start gap-3">
             <div className="shrink-0 w-9 h-9 bg-indigo-100 dark:bg-indigo-900/60 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <LockClosedIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">Protected page</h4>
