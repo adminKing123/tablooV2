@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Prisma } from '@prisma/client';
 import { AuthService } from '@/lib/services/auth.service';
+import { generateToken } from '@/lib/jwt';
 import { validateLogin, validateSignup } from '@/lib/utils/validate';
 import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/email';
 
@@ -100,7 +101,8 @@ export async function signupAction(prevState, formData) {
 
 /* ─────────────────────────────────────────────────────────
    verifyOTPAction
-   On success: sends welcome email + redirects to /login?verified=1.
+   On success: sends welcome email, sets session cookie,
+   and redirects straight to /profile (auto-login).
    On failure: returns { error: string }.
 ───────────────────────────────────────────────────────── */
 export async function verifyOTPAction(prevState, formData) {
@@ -109,8 +111,9 @@ export async function verifyOTPAction(prevState, formData) {
 
   if (!email || !otpCode) return { error: 'Email and OTP code are required' };
 
+  let user;
   try {
-    const user = await AuthService.verifyOTP(email, otpCode);
+    user = await AuthService.verifyOTP(email, otpCode);
     sendWelcomeEmail(email, user.firstName).catch(err =>
       console.error('Welcome email failed:', err)
     );
@@ -119,7 +122,18 @@ export async function verifyOTPAction(prevState, formData) {
     return { error: toErrorMessage(err) };
   }
 
-  redirect('/login?verified=1');
+  // Issue a session token so the user is immediately logged in
+  const token = await generateToken({ userId: user.id, email });
+  const jar   = await cookies();
+  jar.set('auth_token', token, {
+    httpOnly: true,
+    secure:   process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge:   60 * 60 * 24 * 7, // 7 days
+    path:     '/',
+  });
+
+  redirect('/profile');
 }
 
 /* ─────────────────────────────────────────────────────────
