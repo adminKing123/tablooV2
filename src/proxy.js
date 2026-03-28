@@ -8,7 +8,7 @@ import { jwtVerify } from 'jose';
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = ['/profile'];
+  const protectedRoutes = ['/profile', '/onboarding'];
   const authRoutes = ['/login', '/signup', '/verify-otp', '/forgot-password', '/reset-password'];
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));

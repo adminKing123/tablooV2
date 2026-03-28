@@ -22,6 +22,14 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  // Onboarding / extended profile
+  jobTitle            String?  @map("job_title")         @db.VarChar(100)
+  phone               String?  @map("phone")              @db.VarChar(20)
+  usageType           String?  @map("usage_type")         @db.VarChar(20)
+  teamSize            String?  @map("team_size")          @db.VarChar(10)
+  workspaceName       String?  @map("workspace_name")     @db.VarChar(100)
+  onboardingCompleted Boolean  @default(false)            @map("onboarding_completed")
+
   // Relations
   otps Otp[]
 

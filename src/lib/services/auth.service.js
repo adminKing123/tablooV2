@@ -70,7 +70,7 @@ export const AuthService = {
   async verifyOTP(email, otpCode) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
-      select: { id: true, firstName: true, isVerified: true },
+      select: { id: true, firstName: true, isVerified: true, onboardingCompleted: true },
     });
 
     if (!user) throw new Error('USER_NOT_FOUND');
@@ -136,10 +136,22 @@ export const AuthService = {
   async getUserById(id) {
     return prisma.user.findFirst({
       where: { id, isVerified: true },
-      select: { id: true, email: true, firstName: true, lastName: true, createdAt: true },
+      select: {
+        id: true, email: true, firstName: true, lastName: true, createdAt: true,
+        jobTitle: true, phone: true, usageType: true, teamSize: true,
+        workspaceName: true, onboardingCompleted: true,
+      },
     });
   },
-
+  /**
+   * Save onboarding profile data and mark onboarding as complete.
+   */
+  async updateOnboarding(userId, { jobTitle, phone, usageType, teamSize, workspaceName }) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { jobTitle, phone, usageType, teamSize, workspaceName, onboardingCompleted: true },
+    });
+  },
   // ─────────────────────────────────────────────────────────────────────────
   // Password reset flow
   // ─────────────────────────────────────────────────────────────────────────

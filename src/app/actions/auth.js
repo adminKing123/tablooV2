@@ -41,16 +41,16 @@ export async function loginAction(prevState, formData) {
   const validationError = validateLogin({ email, password });
   if (validationError) return { error: validationError };
 
-  let token;
+  let user, token;
   try {
-    ({ token } = await AuthService.login(email, password));
+    ({ user, token } = await AuthService.login(email, password));
   } catch (err) {
     // Unverified user — send/reuse their OTP and redirect to verification
     if (err.message === 'EMAIL_NOT_VERIFIED') {
-      const user = await AuthService.findByEmail(email);
-      if (user) {
-        const otpCode = await AuthService.getOrCreateVerificationOTP(user.id);
-        sendOTPEmail(user.email, user.firstName, otpCode)
+      const found = await AuthService.findByEmail(email);
+      if (found) {
+        const otpCode = await AuthService.getOrCreateVerificationOTP(found.id);
+        sendOTPEmail(found.email, found.firstName, otpCode)
           .catch(e => console.error('Verification redirect email failed:', e));
       }
       redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
@@ -59,7 +59,6 @@ export async function loginAction(prevState, formData) {
     return { error: toErrorMessage(err) };
   }
 
-  // cookies() from next/headers works correctly in Server Actions
   const jar = await cookies();
   jar.set('auth_token', token, {
     httpOnly: true,
@@ -69,7 +68,7 @@ export async function loginAction(prevState, formData) {
     path:     '/',
   });
 
-  redirect('/profile');
+  redirect(user.onboardingCompleted ? '/profile' : '/onboarding');
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -144,7 +143,8 @@ export async function verifyOTPAction(prevState, formData) {
     path:     '/',
   });
 
-  redirect('/profile');
+  // New accounts always need onboarding; onboardingCompleted defaults to false
+  redirect(user.onboardingCompleted ? '/profile' : '/onboarding');
 }
 
 /* ─────────────────────────────────────────────────────────

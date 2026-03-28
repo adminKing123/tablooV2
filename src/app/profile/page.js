@@ -3,6 +3,9 @@ import { getServerUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { CheckCircleIcon, LockClosedIcon } from '@/assets/icons';
 
+const USAGE_LABELS = { WORK: 'Work', PERSONAL: 'Personal', SCHOOL: 'School' };
+const TEAM_LABELS  = { SOLO: 'Just me', '2-5': '2–5 people', '6-15': '6–15 people', '16-50': '16–50 people', '50+': '50+ people' };
+
 /** Individual display row inside the account details card */
 function ProfileField({ label, value }) {
   return (
@@ -23,6 +26,7 @@ function ProfileField({ label, value }) {
 export default async function ProfilePage() {
   const user = await getServerUser();
   if (!user) redirect('/login');
+  if (!user.onboardingCompleted) redirect('/onboarding');
 
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
   const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
@@ -65,6 +69,11 @@ export default async function ProfilePage() {
               <ProfileField label="First name"    value={user.firstName} />
               <ProfileField label="Last name"     value={user.lastName} />
               <ProfileField label="Email address" value={user.email} />
+              <ProfileField label="Role"          value={user.jobTitle} />
+              <ProfileField label="Phone"         value={user.phone} />
+              <ProfileField label="Using Tabloo for" value={USAGE_LABELS[user.usageType]} />
+              <ProfileField label="Team size"     value={TEAM_LABELS[user.teamSize]} />
+              <ProfileField label="Workspace"     value={user.workspaceName} />
               <ProfileField label="Member since"  value={memberSince} />
             </dl>
           </div>
