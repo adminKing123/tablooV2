@@ -1,32 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { logoutAction } from '@/app/actions/auth';
 import Spinner from '@/components/ui/Spinner';
 
 /**
  * DashboardLayout — top-nav shell for all protected pages.
- * Manages loading state, logout, and user avatar dropdown.
+ *
+ * Receives the already-fetched `user` object from the parent Server Component
+ * (e.g. ProfilePage). No client-side auth context needed.
+ *
+ * Logout calls the logoutAction Server Action directly — no fetch(), no router.
  */
-export default function DashboardLayout({ children }) {
-  const { user, loading, logout } = useAuth();
+export default function DashboardLayout({ user, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
+  const [loggingOut, startLogout] = useTransition();
 
-  const handleLogout = async () => {
-    setLoggingOut(true);
+  const handleLogout = () => {
     setMenuOpen(false);
-    await logout();
+    startLogout(async () => {
+      await logoutAction();
+    });
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Spinner className="w-8 h-8 text-indigo-600" />
-      </div>
-    );
-  }
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
 

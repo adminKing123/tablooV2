@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useActionState, useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { verifyOTPAction, resendOTPAction } from '@/app/actions/auth';
 import AuthLayout from '@/components/layout/AuthLayout';
 import OTPInput from '@/components/ui/OTPInput';
 import Button from '@/components/ui/Button';
@@ -11,51 +11,19 @@ import Alert from '@/components/ui/Alert';
 import Spinner from '@/components/ui/Spinner';
 
 function VerifyOTPContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { verifyOTP, resendOTP } = useAuth();
-  const [email, setEmail] = useState('');
+  const email = decodeURIComponent(searchParams.get('email') ?? '');
+
+  // OTPInput is controlled for UX — value syncs into a hidden form input
   const [otpCode, setOtpCode] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
 
+  const [verifyState, verifyAction, verifyPending] = useActionState(verifyOTPAction, null);
+  const [resendState, resendAction, resendPending] = useActionState(resendOTPAction, null);
+
+  // Clear the OTP boxes after a successful resend
   useEffect(() => {
-    const param = searchParams.get('email');
-    if (param) setEmail(decodeURIComponent(param));
-  }, [searchParams]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-    try {
-      await verifyOTP(email, otpCode);
-      setSuccess('Email verified! Redirecting to sign in...');
-      setTimeout(() => router.push('/login'), 2000);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    setError('');
-    setSuccess('');
-    setResending(true);
-    try {
-      await resendOTP(email);
-      setSuccess('A new code has been sent to your email.');
-      setOtpCode('');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setResending(false);
-    }
-  };
+    if (resendState?.success) setOtpCode('');
+  }, [resendState]);
 
   return (
     <AuthLayout
@@ -76,39 +44,44 @@ function VerifyOTPContent() {
         </Link>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Alert type="error"   message={error} />
-        <Alert type="success" message={success} />
+      {/* ── Verify form ── */}
+      <form action={verifyAction} className="space-y-6">
+        {/* Hidden fields pass email + OTP value to the Server Action */}
+        <input type="hidden" name="email"   value={email} />
+        <input type="hidden" name="otpCode" value={otpCode} />
 
-        {/* 6-box OTP input */}
+        <Alert type="error"   message={verifyState?.error} />
+        <Alert type="success" message={resendState?.success} />
+
         <OTPInput
           value={otpCode}
           onChange={setOtpCode}
-          disabled={loading || !!success}
+          disabled={verifyPending}
         />
 
         <Button
           type="submit"
           fullWidth
-          loading={loading}
+          loading={verifyPending}
           size="lg"
-          disabled={otpCode.length !== 6 || !!success}
+          disabled={otpCode.replace(/\s/g, '').length !== 6}
         >
           Verify email
         </Button>
+      </form>
 
-        {/* Resend */}
-        <div className="text-center">
-          <span className="text-sm text-slate-500">Didn&apos;t receive a code?{' '}</span>
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resending || !!success}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {resending ? 'Sending…' : 'Resend code'}
-          </button>
-        </div>
+      {/* ── Resend form ── */}
+      <form action={resendAction} className="mt-4 text-center">
+        <input type="hidden" name="email" value={email} />
+        <Alert type="error" message={resendState?.error} className="mb-3 text-left" />
+        <span className="text-sm text-slate-500">Didn&apos;t receive a code?{' '}</span>
+        <button
+          type="submit"
+          disabled={resendPending}
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {resendPending ? 'Sending…' : 'Resend code'}
+        </button>
       </form>
     </AuthLayout>
   );

@@ -1,43 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useActionState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { loginAction } from '@/app/actions/auth';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
+import Spinner from '@/components/ui/Spinner';
 
-export default function LoginPage() {
-  const router = useRouter();
-  const { login, user } = useAuth();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (user) router.push('/profile');
-  }, [user, router]);
-
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    setError('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await login(formData.email, formData.password);
-      router.push('/profile');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+/**
+ * Inner component needs useSearchParams, so it must be wrapped in Suspense.
+ */
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const justVerified = searchParams.get('verified') === '1';
+  const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
     <AuthLayout
@@ -52,8 +31,11 @@ export default function LoginPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Alert type="error" message={error} />
+      <form action={formAction} className="space-y-4">
+        {justVerified && (
+          <Alert type="success" message="Email verified! You can now sign in." />
+        )}
+        <Alert type="error" message={state?.error} />
 
         <Input
           id="email"
@@ -61,10 +43,9 @@ export default function LoginPage() {
           type="email"
           label="Email address"
           placeholder="you@example.com"
-          value={formData.email}
-          onChange={handleChange}
           autoComplete="email"
           required
+          disabled={pending}
         />
 
         <div className="space-y-1.5">
@@ -74,10 +55,9 @@ export default function LoginPage() {
             type="password"
             label="Password"
             placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
             autoComplete="current-password"
             required
+            disabled={pending}
           />
           <div className="text-right">
             <span className="text-xs text-indigo-600 hover:text-indigo-500 cursor-pointer">
@@ -86,10 +66,24 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <Button type="submit" fullWidth loading={loading} size="lg" className="mt-2">
+        <Button type="submit" fullWidth loading={pending} size="lg" className="mt-2">
           Sign in
         </Button>
       </form>
     </AuthLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <Spinner className="w-8 h-8 text-indigo-500" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

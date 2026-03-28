@@ -1,9 +1,8 @@
-'use client';
-
-import { useAuth } from '@/contexts/AuthContext';
+import { redirect } from 'next/navigation';
+import { getServerUser } from '@/lib/auth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
-/** Individual field row inside the profile details card */
+/** Individual display row inside the account details card */
 function ProfileField({ label, value }) {
   return (
     <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -13,21 +12,24 @@ function ProfileField({ label, value }) {
   );
 }
 
-export default function ProfilePage() {
-  const { user } = useAuth();
+/**
+ * ProfilePage — async Server Component.
+ *
+ * Reads the auth cookie on the server via getServerUser(). No fetch() call,
+ * no useEffect, no client-side loading state. If the cookie is missing or
+ * invalid the user is redirected immediately before any HTML is sent.
+ */
+export default async function ProfilePage() {
+  const user = await getServerUser();
+  if (!user) redirect('/login');
 
-  const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
-
-  const memberSince = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
+  const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+  const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={user}>
       <div className="space-y-6">
 
         {/* Page header */}
@@ -46,10 +48,9 @@ export default function ProfilePage() {
               <span className="text-2xl font-bold text-white">{initials}</span>
             </div>
             <h2 className="mt-4 text-lg font-semibold text-slate-900">
-              {user?.firstName} {user?.lastName}
+              {user.firstName} {user.lastName}
             </h2>
-            <p className="text-sm text-slate-500 mt-0.5 break-all">{user?.email}</p>
-            {/* Verified badge */}
+            <p className="text-sm text-slate-500 mt-0.5 break-all">{user.email}</p>
             <span className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -66,9 +67,9 @@ export default function ProfilePage() {
           <div className="xl:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-base font-semibold text-slate-900 mb-2">Account information</h3>
             <dl className="divide-y divide-slate-100">
-              <ProfileField label="First name"    value={user?.firstName} />
-              <ProfileField label="Last name"     value={user?.lastName} />
-              <ProfileField label="Email address" value={user?.email} />
+              <ProfileField label="First name"    value={user.firstName} />
+              <ProfileField label="Last name"     value={user.lastName} />
+              <ProfileField label="Email address" value={user.email} />
               <ProfileField label="Member since"  value={memberSince} />
             </dl>
           </div>
