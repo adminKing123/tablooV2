@@ -13,7 +13,7 @@ export default async function WorkspacePage() {
   if (!user) redirect('/login');
   if (!user.onboardingCompleted) redirect('/onboarding');
 
-  const projects = await ProjectService.getByUserId(user.id);
+  const projects = await ProjectService.getAccessibleByUserId(user.id);
   const workspaceName = user.workspaceName || `${user.firstName}'s Workspace`;
 
   return (

@@ -11,6 +11,12 @@ const VISIBILITY_LABELS = {
   TEAM:    { label: 'Team',    icon: '👥' },
 };
 
+const ROLE_BADGE = {
+  ADMIN:  { label: 'Admin',  className: 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-900/50' },
+  MEMBER: { label: 'Member', className: 'bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-300 border-green-200 dark:border-green-900/50' },
+  VIEWER: { label: 'Viewer', className: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' },
+};
+
 /**
  * WorkspaceClient — interactive shell rendered inside the server WorkspacePage.
  * Owns the modal open/close state and receives projects + workspace name as props.
@@ -73,8 +79,9 @@ export default function WorkspaceClient({ workspaceName, initialProjects }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
           {initialProjects.map(project => {
-            const vis = VISIBILITY_LABELS[project.visibility] ?? VISIBILITY_LABELS.PRIVATE;
+            const vis     = VISIBILITY_LABELS[project.visibility] ?? VISIBILITY_LABELS.PRIVATE;
             const created = new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const roleBadge = project.userRole && project.userRole !== 'OWNER' ? ROLE_BADGE[project.userRole] : null;
 
             return (
               <Link
@@ -91,9 +98,16 @@ export default function WorkspaceClient({ workspaceName, initialProjects }) {
                     {project.icon}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">
-                      {project.name}
-                    </h3>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">
+                        {project.name}
+                      </h3>
+                      {roleBadge && (
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${roleBadge.className}`}>
+                          {roleBadge.label}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                       {vis.icon} {vis.label} · {created}
                     </p>

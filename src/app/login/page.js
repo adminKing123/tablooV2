@@ -17,6 +17,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const justVerified = searchParams.get('verified') === '1';
   const justReset    = searchParams.get('reset')    === '1';
+  const invite       = searchParams.get('invite')   ?? '';
   const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
@@ -33,6 +34,7 @@ function LoginForm() {
       }
     >
       <form action={formAction} className="space-y-4">
+        {invite && <input type="hidden" name="invite" value={invite} />}
         {justVerified && (
           <Alert type="success" message="Email verified! You can now sign in." />
         )}

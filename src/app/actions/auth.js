@@ -68,6 +68,8 @@ export async function loginAction(prevState, formData) {
     path:     '/',
   });
 
+  const invite = formData.get('invite')?.toString().trim();
+  if (invite) redirect(`/invite/${invite}`);
   redirect(user.onboardingCompleted ? '/workspace' : '/onboarding');
 }
 
@@ -84,6 +86,7 @@ export async function signupAction(prevState, formData) {
     password:        formData.get('password')?.toString()               ?? '',
     confirmPassword: formData.get('confirmPassword')?.toString()        ?? '',
   };
+  const invite = formData.get('invite')?.toString().trim() ?? '';
 
   const validationError = validateSignup(body);
   if (validationError) return { error: validationError };
@@ -106,7 +109,8 @@ export async function signupAction(prevState, formData) {
   sendOTPEmail(user.email, user.firstName, otpCode)
     .catch(err => console.error('OTP email failed:', err));
 
-  redirect(`/verify-otp?email=${encodeURIComponent(body.email)}`);
+  const inviteParam = invite ? `&invite=${encodeURIComponent(invite)}` : '';
+  redirect(`/verify-otp?email=${encodeURIComponent(body.email)}${inviteParam}`);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -144,6 +148,8 @@ export async function verifyOTPAction(prevState, formData) {
   });
 
   // New accounts always need onboarding; onboardingCompleted defaults to false
+  const invite = formData.get('invite')?.toString().trim();
+  if (invite) redirect(`/invite/${invite}`);
   redirect(user.onboardingCompleted ? '/profile' : '/onboarding');
 }
 

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/app/actions/auth';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import Spinner from '@/components/ui/Spinner';
-import { SparklesIcon, CogIcon, ChevronDownIcon, UserIcon, SignOutIcon } from '@/assets/icons';
+import { SparklesIcon, CogIcon, UsersIcon, ChevronDownIcon, UserIcon, SignOutIcon } from '@/assets/icons';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -23,7 +23,7 @@ const VISIBILITY_LABELS = {
  * Used by [projectId]/layout.js to wrap every project route (overview, settings).
  * Sidebar nav uses <Link> so TopProgressBar fires naturally on every transition.
  */
-export default function ProjectShell({ project, user, children }) {
+export default function ProjectShell({ project, user, userRole, children }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen]   = useState(false);
   const [loggingOut, startLogout] = useTransition();
@@ -31,7 +31,8 @@ export default function ProjectShell({ project, user, children }) {
   const base = `/workspace/${project.id}`;
 
   const NAV_ITEMS = [
-    { href: base,               label: 'Overview', Icon: SparklesIcon, active: pathname === base                       },
+    { href: base,               label: 'Overview', Icon: SparklesIcon, active: pathname === base                        },
+    { href: `${base}/members`,  label: 'Members',  Icon: UsersIcon,    active: pathname.startsWith(`${base}/members`)  },
     { href: `${base}/settings`, label: 'Settings', Icon: CogIcon,      active: pathname.startsWith(`${base}/settings`) },
   ];
 

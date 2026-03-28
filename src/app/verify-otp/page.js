@@ -12,7 +12,8 @@ import Spinner from '@/components/ui/Spinner';
 
 function VerifyOTPContent() {
   const searchParams = useSearchParams();
-  const email = decodeURIComponent(searchParams.get('email') ?? '');
+  const email  = decodeURIComponent(searchParams.get('email')  ?? '');
+  const invite = searchParams.get('invite') ?? '';
 
   // OTPInput is controlled for UX — value syncs into a hidden form input
   const [otpCode, setOtpCode] = useState('');
@@ -46,9 +47,10 @@ function VerifyOTPContent() {
     >
       {/* ── Verify form ── */}
       <form action={verifyAction} className="space-y-6">
-        {/* Hidden fields pass email + OTP value to the Server Action */}
+        {/* Hidden fields pass email, OTP value, and optional invite token to the Server Action */}
         <input type="hidden" name="email"   value={email} />
         <input type="hidden" name="otpCode" value={otpCode} />
+        {invite && <input type="hidden" name="invite" value={invite} />}
 
         <Alert type="error"   message={verifyState?.error} />
         <Alert type="success" message={resendState?.success} />

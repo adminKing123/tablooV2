@@ -31,8 +31,10 @@ model User {
   onboardingCompleted Boolean  @default(false)            @map("onboarding_completed")
 
   // Relations
-  otps     Otp[]
-  projects Project[]
+  otps            Otp[]
+  projects        Project[]
+  projectMembers  ProjectMember[]
+  sentInvitations ProjectInvitation[] @relation("InvitationsSent")
 
   @@map("users")
 }
@@ -52,11 +54,53 @@ model Project {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members     ProjectMember[]
+  invitations ProjectInvitation[]
 
   // Indexes
   @@index([userId])
   @@map("projects")
+}
+
+// ─── ProjectMember ────────────────────────────────────────────────────────────
+
+model ProjectMember {
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  userId    Int      @map("user_id")
+  role      String   @default("MEMBER") @db.VarChar(20) // OWNER | ADMIN | MEMBER | VIEWER
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId],    references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+// ─── ProjectInvitation ────────────────────────────────────────────────────────
+
+model ProjectInvitation {
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  invitedBy Int      @map("invited_by")
+  email     String   @db.VarChar(255)
+  role      String   @default("MEMBER") @db.VarChar(20)
+  token     String   @unique @db.VarChar(255)
+  status    String   @default("PENDING") @db.VarChar(20) // PENDING | ACCEPTED | DECLINED | EXPIRED
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  inviter User    @relation("InvitationsSent", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([email])
+  @@index([token])
+  @@map("project_invitations")
 }
 
 // ─── OTP ─────────────────────────────────────────────────────────────────────

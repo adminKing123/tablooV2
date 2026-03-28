@@ -8,7 +8,7 @@ export async function generateMetadata({ params }) {
   const { projectId } = await params;
   const user    = await getServerUser();
   if (!user) return {};
-  const project = await ProjectService.getById(Number(projectId), user.id);
+  const project = await ProjectService.getByIdWithAccess(Number(projectId), user.id);
   return { title: project?.name ?? 'Project' };
 }
 
@@ -31,7 +31,7 @@ export default async function ProjectOverviewPage({ params }) {
   const user    = await getServerUser();
   if (!user) redirect('/login');
 
-  const project = await ProjectService.getById(Number(projectId), user.id);
+  const project = await ProjectService.getByIdWithAccess(Number(projectId), user.id);
   if (!project) notFound();
 
   const vis     = VISIBILITY_LABELS[project.visibility] ?? VISIBILITY_LABELS.PRIVATE;

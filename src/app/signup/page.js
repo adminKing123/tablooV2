@@ -1,14 +1,23 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signupAction } from '@/app/actions/auth';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
+import Spinner from '@/components/ui/Spinner';
 
-export default function SignupPage() {
+/**
+ * Inner form reads searchParams for invite pre-fill, so it needs Suspense.
+ */
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const preEmail     = searchParams.get('email')  ?? '';
+  const invite       = searchParams.get('invite') ?? '';
+
   const [state, formAction, pending] = useActionState(signupAction, null);
 
   return (
@@ -25,6 +34,7 @@ export default function SignupPage() {
       }
     >
       <form action={formAction} className="space-y-4">
+        {invite   && <input type="hidden" name="invite" value={invite} />}
         <Alert type="error" message={state?.error} />
 
         <Input
@@ -34,6 +44,7 @@ export default function SignupPage() {
           label="Email address"
           placeholder="you@example.com"
           autoComplete="email"
+          defaultValue={preEmail}
           required
           disabled={pending}
         />
@@ -91,3 +102,18 @@ export default function SignupPage() {
     </AuthLayout>
   );
 }
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Spinner className="w-8 h-8 text-indigo-500" />
+        </div>
+      }
+    >
+      <SignupForm />
+    </Suspense>
+  );
+}
+
