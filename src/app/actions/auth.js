@@ -68,7 +68,7 @@ export async function loginAction(prevState, formData) {
     path:     '/',
   });
 
-  redirect(user.onboardingCompleted ? '/profile' : '/onboarding');
+  redirect(user.onboardingCompleted ? '/workspace' : '/onboarding');
 }
 
 /* ─────────────────────────────────────────────────────────
