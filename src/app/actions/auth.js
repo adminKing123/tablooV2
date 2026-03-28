@@ -179,18 +179,19 @@ export async function forgotPasswordAction(prevState, formData) {
   const email = formData.get('email')?.toString().trim() ?? '';
   if (!email) return { error: 'Email address is required' };
 
-  // Attempt to create a reset OTP — silently ignore if user not found
-  const result = await AuthService.forgotPassword(email).catch((err) => {
+  let result;
+  try {
+    result = await AuthService.forgotPassword(email);
+  } catch (err) {
     console.error('forgotPasswordAction:', err.message);
-    return null;
-  });
-
-  if (result) {
-    sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
-      .catch(err => console.error('Password reset email failed:', err));
+    return { error: 'Something went wrong. Please try again.' };
   }
 
-  // Always redirect — never reveal whether the email is registered
+  if (!result) return { error: 'No account found with that email address' };
+
+  sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
+    .catch(err => console.error('Password reset email failed:', err));
+
   redirect(`/reset-password?email=${encodeURIComponent(email)}`);
 }
 
