@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import { AuthService } from '@/lib/services/auth.service';
 import { generateToken } from '@/lib/jwt';
 import { validateLogin, validateSignup } from '@/lib/utils/validate';
-import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/email';
+import { sendOTPEmail, sendWelcomeEmail, sendPasswordResetEmail, sendPasswordResetConfirmationEmail } from '@/lib/email';
 
 /**
  * Map AuthService named error codes to user-facing messages.
@@ -189,8 +189,8 @@ export async function forgotPasswordAction(prevState, formData) {
 
   if (!result) return { error: 'No account found with that email address' };
 
-  sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
-    .catch(err => console.error('Password reset email failed:', err));
+  // Await the email so any send error surfaces before we redirect
+  await sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode);
 
   redirect(`/reset-password?email=${encodeURIComponent(email)}`);
 }
@@ -213,12 +213,17 @@ export async function resetPasswordAction(prevState, formData) {
   if (newPassword.length < 8)             return { error: 'Password must be at least 8 characters' };
   if (newPassword !== confirmPassword)    return { error: 'Passwords do not match' };
 
+  let user;
   try {
-    await AuthService.verifyAndResetPassword(email, otpCode, newPassword);
+    user = await AuthService.verifyAndResetPassword(email, otpCode, newPassword);
   } catch (err) {
     console.error('resetPasswordAction:', err.message);
     return { error: toErrorMessage(err) };
   }
+
+  // Fire confirmation email (non-blocking — failure should not break the flow)
+  sendPasswordResetConfirmationEmail(user.email, user.firstName)
+    .catch(err => console.error('Reset confirmation email failed:', err));
 
   redirect('/login?reset=1');
 }

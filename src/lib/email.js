@@ -221,3 +221,75 @@ export async function sendPasswordResetEmail(to, firstName, otpCode) {
     throw new Error('Failed to send password reset email');
   }
 }
+
+/**
+ * Send password reset confirmation email after a successful reset.
+ * @param {string} to        — Recipient email address
+ * @param {string} firstName — User's first name
+ */
+export async function sendPasswordResetConfirmationEmail(to, firstName) {
+  try {
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: `"${process.env.APP_NAME || 'Tabloo'}" <${process.env.SMTP_USER}>`,
+      to,
+      subject: 'Your password has been reset — Tabloo',
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Password Reset Successful</title>
+          </head>
+          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 40px 0; text-align: center;">
+                  <table role="presentation" style="width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                      <td style="padding: 40px 30px; text-align: center;">
+                        <div style="margin-bottom: 24px;">
+                          <div style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 12px; padding: 12px 20px;">
+                            <span style="color: #ffffff; font-size: 20px; font-weight: bold;">T</span>
+                          </div>
+                        </div>
+                        <div style="width: 56px; height: 56px; background-color: #dcfce7; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                          <span style="font-size: 28px;">✓</span>
+                        </div>
+                        <h1 style="color: #1e293b; font-size: 22px; margin: 0 0 12px 0;">Password reset successfully</h1>
+                        <p style="color: #64748b; font-size: 15px; line-height: 24px; margin: 0 0 24px 0;">
+                          Hi ${firstName}, your password for your ${process.env.APP_NAME || 'Tabloo'} account has been changed successfully.
+                        </p>
+                        <a href="${process.env.APP_URL || 'http://localhost:3000'}/login" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; margin-bottom: 24px;">
+                          Sign in to your account
+                        </a>
+                        <p style="color: #94a3b8; font-size: 13px; line-height: 20px; margin: 0;">
+                          If you didn&apos;t make this change, please contact support immediately.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background-color: #f8fafc; padding: 20px 30px; border-radius: 0 0 8px 8px; border-top: 1px solid #e2e8f0;">
+                        <p style="color: #94a3b8; font-size: 12px; margin: 0; text-align: center;">
+                          &copy; ${new Date().getFullYear()} ${process.env.APP_NAME || 'Tabloo'}. All rights reserved.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `,
+      text: `Hi ${firstName},\n\nYour password has been reset successfully.\n\nIf you didn't make this change, contact support immediately.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Password reset confirmation email error:', error);
+    // Non-critical — don't throw
+  }
+}

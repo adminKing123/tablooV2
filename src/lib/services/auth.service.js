@@ -132,7 +132,7 @@ export const AuthService = {
   async forgotPassword(email) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
-      select: { id: true, firstName: true, isVerified: true },
+      select: { id: true, email: true, firstName: true, isVerified: true },
     });
 
     if (!user?.isVerified) return null;
@@ -167,7 +167,13 @@ export const AuthService = {
 
     const passwordHash = await hashPassword(newPassword);
 
-    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+      select: { email: true, firstName: true },
+    });
     await prisma.otp.deleteMany({ where: { userId: user.id, type: OTP_TYPES.PASSWORD_RESET } });
+
+    return updated;
   },
 };
