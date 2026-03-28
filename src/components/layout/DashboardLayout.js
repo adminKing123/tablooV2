@@ -36,7 +36,7 @@ export default function DashboardLayout({ user, children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/profile" className="flex items-center gap-2.5 shrink-0">
+          <Link href="/workspace" className="flex items-center gap-2.5 shrink-0">
             <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xs">T</span>
             </div>
@@ -46,10 +46,16 @@ export default function DashboardLayout({ user, children }) {
           {/* Nav links */}
           <nav className="hidden md:flex items-center gap-1 flex-1 ml-4">
             <Link
+              href="/workspace"
+              className="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors"
+            >
+              Workspace
+            </Link>
+            <Link
               href="/profile"
               className="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors"
             >
-              Dashboard
+              Profile
             </Link>
           </nav>
 

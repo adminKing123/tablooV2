@@ -31,7 +31,7 @@ export async function completeOnboardingAction(prevState, formData) {
     return { error: 'Something went wrong. Please try again.', step: 4 };
   }
 
-  redirect('/profile');
+  redirect('/workspace');
 }
 
 /**
@@ -50,5 +50,5 @@ export async function skipOnboardingAction() {
     console.error('skipOnboardingAction:', err.message);
   }
 
-  redirect('/profile');
+  redirect('/workspace');
 }
