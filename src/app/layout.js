@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import TopProgressBar from "@/components/ui/TopProgressBar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,7 +42,10 @@ export default function RootLayout({ children }) {
             __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`,
           }}
         />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TopProgressBar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
