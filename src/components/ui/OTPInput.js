@@ -150,32 +150,3 @@ export default function OTPInput({ value = '', onChange, disabled = false, autoF
     </div>
   );
 }
-
-  const refs = useRef([]);
-
-  const handleChange = (i, e) => {
-    const digit = e.target.value.replace(/\D/g, '').slice(-1);
-    const arr = (value + '      ').slice(0, 6).split('');
-    arr[i] = digit || ' ';
-    const next = arr.join('').trimEnd();
-    onChange(next);
-    if (digit && i < 5) refs.current[i + 1]?.focus();
-  };
-
-  const handleKeyDown = (i, e) => {
-    if (e.key === 'Backspace') {
-      e.preventDefault();
-      const arr = (value + '      ').slice(0, 6).split('');
-      if (arr[i].trim()) {
-        arr[i] = ' ';
-      } else if (i > 0) {
-        arr[i - 1] = ' ';
-        refs.current[i - 1]?.focus();
-      }
-      onChange(arr.join('').trimEnd());
-    } else if (e.key === 'ArrowLeft'  && i > 0) {
-      refs.current[i - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && i < 5) {
-      refs.current[i + 1]?.focus();
-    }
-  };
