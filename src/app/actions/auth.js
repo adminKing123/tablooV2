@@ -79,12 +79,10 @@ export async function signupAction(prevState, formData) {
   const validationError = validateSignup(body);
   if (validationError) return { error: validationError };
 
+  let user, otpCode;
   try {
-    const user     = await AuthService.register(body);
-    const otpCode  = await AuthService.createOTP(user.id);
-    sendOTPEmail(user.email, user.firstName, otpCode).catch(err =>
-      console.error('OTP email failed:', err)
-    );
+    user    = await AuthService.register(body);
+    otpCode = await AuthService.createOTP(user.id);
   } catch (err) {
     console.error('signupAction:', err.message);
     if (
@@ -95,6 +93,9 @@ export async function signupAction(prevState, formData) {
     }
     return { error: toErrorMessage(err) };
   }
+
+  sendOTPEmail(user.email, user.firstName, otpCode)
+    .catch(err => console.error('OTP email failed:', err));
 
   redirect(`/verify-otp?email=${encodeURIComponent(body.email)}`);
 }
@@ -114,13 +115,13 @@ export async function verifyOTPAction(prevState, formData) {
   let user;
   try {
     user = await AuthService.verifyOTP(email, otpCode);
-    sendWelcomeEmail(email, user.firstName).catch(err =>
-      console.error('Welcome email failed:', err)
-    );
   } catch (err) {
     console.error('verifyOTPAction:', err.message);
     return { error: toErrorMessage(err) };
   }
+
+  sendWelcomeEmail(email, user.firstName)
+    .catch(err => console.error('Welcome email failed:', err));
 
   // Issue a session token so the user is immediately logged in
   const token = await generateToken({ userId: user.id, email });
@@ -151,9 +152,8 @@ export async function resendOTPAction(prevState, formData) {
     if (user.isVerified) return { error: 'Email is already verified' };
 
     const otpCode = await AuthService.createOTP(user.id);
-    sendOTPEmail(user.email, user.firstName, otpCode).catch(err =>
-      console.error('Resend OTP email failed:', err)
-    );
+    sendOTPEmail(user.email, user.firstName, otpCode)
+      .catch(err => console.error('Resend OTP email failed:', err));
     return { success: 'A new code has been sent to your email.' };
   } catch (err) {
     console.error('resendOTPAction:', err.message);
@@ -189,8 +189,8 @@ export async function forgotPasswordAction(prevState, formData) {
 
   if (!result) return { error: 'No account found with that email address' };
 
-  // Await the email so any send error surfaces before we redirect
-  await sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode);
+  sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
+    .catch(err => console.error('Password reset email failed:', err));
 
   redirect(`/reset-password?email=${encodeURIComponent(email)}`);
 }
@@ -221,7 +221,6 @@ export async function resetPasswordAction(prevState, formData) {
     return { error: toErrorMessage(err) };
   }
 
-  // Fire confirmation email (non-blocking — failure should not break the flow)
   sendPasswordResetConfirmationEmail(user.email, user.firstName)
     .catch(err => console.error('Reset confirmation email failed:', err));
 
@@ -237,10 +236,13 @@ export async function resendResetOTPAction(prevState, formData) {
   const email = formData.get('email')?.toString().trim() ?? '';
   if (!email) return { error: 'Email is required' };
 
-  const result = await AuthService.forgotPassword(email).catch((err) => {
+  let result;
+  try {
+    result = await AuthService.forgotPassword(email);
+  } catch (err) {
     console.error('resendResetOTPAction:', err.message);
-    return null;
-  });
+    return { error: 'Something went wrong. Please try again.' };
+  }
 
   if (result) {
     sendPasswordResetEmail(result.user.email, result.user.firstName, result.otpCode)
